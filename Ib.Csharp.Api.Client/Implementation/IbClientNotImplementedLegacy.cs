@@ -281,12 +281,6 @@ public partial class IbClient
         NotImplemented();
     }
 
-    public void tickByTickAllLast(int reqId, int tickType, long time, double price, decimal size, TickAttribLast tickAttribLast,
-        string exchange, string specialConditions)
-    {
-        NotImplemented();
-    }
-
     public void tickByTickMidPoint(int reqId, long time, double midPoint)
     {
         NotImplemented();

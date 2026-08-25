@@ -15,7 +15,8 @@ public partial class IbClient
     public Action<Dictionary<int, PriceUpdate>> OnMarketDataPriceUpdate { get; set; }
     public Action<Dictionary<int, TradeUpdate>> OnMarketDataTradeUpdate { get; set; }
     
-    public Action<PriceTickByTickUpdate> OnMarketDataTickByTickUpdate { get; set; }
+    public Action<PriceTickByTickUpdate> OnMarketDataPriceTickByTickUpdate { get; set; }
+    public Action<TradeTickByTickUpdate> OnMarketDataTradeTickByTickUpdate { get; set; }
 
     private OrderBookRow[] orderBook;
     public Action<OrderBookRow[]> OnOrderBookUpdate { get; set; }
@@ -354,6 +355,28 @@ public partial class IbClient
             AskSize = askSize,
             TickAttribBidAsk = tickAttribBidAsk
         };
-        OnMarketDataTickByTickUpdate?.Invoke(tickByTickUpdate);
+        OnMarketDataPriceTickByTickUpdate?.Invoke(tickByTickUpdate);
+    }
+    
+    public void SubscribeToTradesTickByTick(int reqId, Contract contract)
+    {
+        _clientSocket.reqTickByTickData(reqId, contract, "Last", 0, true);
+    }
+    
+    public void tickByTickAllLast(int reqId, int tickType, long time, double price, decimal size, TickAttribLast tickAttribLast,
+        string exchange, string specialConditions)
+    {
+        var tickByTickUpdate = new TradeTickByTickUpdate
+        {
+            ReqId = reqId,
+            TickType = tickType,
+            Time = time,
+            Price = price,
+            Size = size,
+            TickAttribLast = tickAttribLast,
+            Exchange = exchange,
+            SpecialConditions = specialConditions
+        };
+        OnMarketDataTradeTickByTickUpdate?.Invoke(tickByTickUpdate);
     }
 }
