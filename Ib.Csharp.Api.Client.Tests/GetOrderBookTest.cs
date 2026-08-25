@@ -11,7 +11,7 @@ namespace Ib.Csharp.Api.Client.Tests
         {
             var logFile = "orderbook.log";
             using var client = new IbClient();
-            client.OnNotification += msg => System.IO.File.AppendAllText(logFile, msg + Environment.NewLine);
+            client.OnNotification += msg => File.AppendAllText(logFile, msg + Environment.NewLine);
             client.OnOrderBookUpdate += book =>
             {
                 var ladder = OrderBookHelper.FormatAsLadder(book);
@@ -26,7 +26,7 @@ namespace Ib.Csharp.Api.Client.Tests
                     output.AppendLine($"{bidSize,-10} | {row.Price,8:F2} | {askSize,10}");
                 }
                 output.AppendLine();
-                System.IO.File.WriteAllText(logFile, output.ToString());
+                File.WriteAllText(logFile, output.ToString());
             };
             client.Start("127.0.0.1", 4001, 0);
             

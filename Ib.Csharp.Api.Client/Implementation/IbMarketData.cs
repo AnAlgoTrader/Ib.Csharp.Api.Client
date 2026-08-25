@@ -14,6 +14,8 @@ public partial class IbClient
 
     public Action<Dictionary<int, PriceUpdate>> OnMarketDataPriceUpdate { get; set; }
     public Action<Dictionary<int, TradeUpdate>> OnMarketDataTradeUpdate { get; set; }
+    
+    public Action<PriceTickByTickUpdate> OnMarketDataTickByTickUpdate { get; set; }
 
     private OrderBookRow[] orderBook;
     public Action<OrderBookRow[]> OnOrderBookUpdate { get; set; }
@@ -332,5 +334,26 @@ public partial class IbClient
         decimal size, bool isSmartDepth)
     {
         updateMktDepth(tickerId, position, operation, side, price, size);
+    }
+
+    public void SubscribeToPriceTickByTick(int reqId, Contract contract)
+    {
+        _clientSocket.reqTickByTickData(reqId, contract, "BidAsk", 0, true);
+    }
+    
+    public void tickByTickBidAsk(int reqId, long time, double bidPrice, double askPrice, decimal bidSize, decimal askSize,
+        TickAttribBidAsk tickAttribBidAsk)
+    {
+        var tickByTickUpdate = new PriceTickByTickUpdate
+        {
+            ReqId = reqId,
+            Time = time,
+            Bid = bidPrice,
+            Ask = askPrice,
+            BidSize = bidSize,
+            AskSize = askSize,
+            TickAttribBidAsk = tickAttribBidAsk
+        };
+        OnMarketDataTickByTickUpdate?.Invoke(tickByTickUpdate);
     }
 }

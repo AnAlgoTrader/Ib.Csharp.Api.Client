@@ -287,12 +287,6 @@ public partial class IbClient
         NotImplemented();
     }
 
-    public void tickByTickBidAsk(int reqId, long time, double bidPrice, double askPrice, decimal bidSize, decimal askSize,
-        TickAttribBidAsk tickAttribBidAsk)
-    {
-        NotImplemented();
-    }
-
     public void tickByTickMidPoint(int reqId, long time, double midPoint)
     {
         NotImplemented();
@@ -303,7 +297,7 @@ public partial class IbClient
         NotImplemented();
     }
 
-    public void completedOrder(IBApi.Contract contract, Order order, OrderState orderState)
+    public void completedOrder(Contract contract, Order order, OrderState orderState)
     {
         NotImplemented();
     }

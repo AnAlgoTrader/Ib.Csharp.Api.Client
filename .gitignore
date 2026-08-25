@@ -4,3 +4,4 @@
 /Ib.Csharp.Api.Client/bin
 /Ib.Csharp.Api.Client/obj
 /.idea
+*.user

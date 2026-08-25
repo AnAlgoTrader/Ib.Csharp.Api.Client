@@ -166,7 +166,7 @@ public partial class IbClient
 
     public void tickByTickDataProtoBuf(TickByTickData tickByTickDataProto)
     {
-        NotImplemented();
+        //ignored
     }
 
     public void updateNewsBulletinProtoBuf(NewsBulletin newsBulletinProto)
