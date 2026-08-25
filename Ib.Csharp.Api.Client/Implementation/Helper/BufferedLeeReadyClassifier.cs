@@ -69,7 +69,7 @@ public readonly struct ClassifiedTrade
 /// materially better accuracy. Fine for building bars/indicators; not
 /// intended for anything requiring sub-buffer-delay decisions.
 /// </summary>
-public class LeeReadyClassifier
+public class BufferedLeeReadyClassifier
 {
     private readonly TimeSpan _bufferDelay;
     private readonly long _quoteRetentionSeconds;
@@ -90,7 +90,7 @@ public class LeeReadyClassifier
     /// How many seconds of quote history to keep. Only needs to exceed
     /// bufferDelay by a comfortable margin -- 10s is a generous default.
     /// </param>
-    public LeeReadyClassifier(TimeSpan? bufferDelay = null, long quoteRetentionSeconds = 10)
+    public BufferedLeeReadyClassifier(TimeSpan? bufferDelay = null, long quoteRetentionSeconds = 10)
     {
         _bufferDelay = bufferDelay ?? TimeSpan.FromMilliseconds(250);
         _quoteRetentionSeconds = quoteRetentionSeconds;
@@ -103,7 +103,7 @@ public class LeeReadyClassifier
         TrimQuoteHistory(time);
     }
 
-    /// <summary>Call from your tickByTickAllLast handler. `time` is IBKR's raw long.</summary>
+    /// <summary>Call from your tickByTickAllLast handler. `time` is IBKR's raw long, `size` is IBKR's decimal.</summary>
     public void OnTrade(long time, double price, decimal size)
     {
         var deadline = DateTime.UtcNow + _bufferDelay; // wall clock -- our own processing delay
@@ -172,7 +172,7 @@ public class LeeReadyClassifier
             }
         }
 
-        return found >= 0 ? _quotes[found] : null;
+        return found >= 0 ? _quotes[found] : (TimestampedQuote?)null;
     }
 
     // Insert keeping ascending order by exchange time (seconds). Equal
