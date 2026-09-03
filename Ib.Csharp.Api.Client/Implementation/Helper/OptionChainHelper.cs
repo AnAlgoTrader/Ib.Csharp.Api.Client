@@ -133,4 +133,12 @@ public static class OptionChainHelper
 
         return data.OrderByDescending(x => x.Contract.Strike).ToList();
     }
+    
+    public static double FindAtmStrike(HashSet<double> strikes, double marketPrice)
+    {
+        if (strikes == null || strikes.Count == 0)
+            throw new ArgumentException("Strikes cannot be empty.");
+
+        return strikes.MinBy(strike => Math.Abs(strike - marketPrice));
+    }
 }
