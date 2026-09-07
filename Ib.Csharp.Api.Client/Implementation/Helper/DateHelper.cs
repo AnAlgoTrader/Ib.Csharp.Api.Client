@@ -196,4 +196,16 @@ public static class DateHelper
     {
         return dateTime.ToString("yyyyMMdd-HH:mm:ss");
     }
+    
+    public static long ToTradingViewTime(DateTime dateTime)
+    {
+        // 1. Ensure the DateTime is treated as UTC to prevent local time zone offsets from skewing the timestamp
+        var utcDateTime = dateTime.Kind == DateTimeKind.Utc 
+            ? dateTime 
+            : dateTime.ToUniversalTime();
+
+        // 2. Convert to DateTimeOffset and extract total milliseconds since 1970-01-01
+        var dto = new DateTimeOffset(utcDateTime);
+        return dto.ToUnixTimeMilliseconds();
+    }
 }
