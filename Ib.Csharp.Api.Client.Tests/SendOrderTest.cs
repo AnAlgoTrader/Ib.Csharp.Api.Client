@@ -54,6 +54,7 @@ public class SendOrderTest
             TotalQuantity = 1,
             OrderType = "LMT",
             LmtPrice = marketDataUpdates.First().Value.BidPrice,
+            Tif = "DAY",
             Transmit = true
         };
         client.PlaceOrder(contract?.Contract, order);

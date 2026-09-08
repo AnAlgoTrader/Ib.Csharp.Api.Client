@@ -109,12 +109,6 @@ public partial class IbClient
         NotImplemented();
     }
 
-    public void realtimeBar(int reqId, long date, double open, double high, double low, double close, decimal volume, decimal wap,
-        int count)
-    {
-        NotImplemented();
-    }
-
     public void scannerParameters(string xml)
     {
         NotImplemented();

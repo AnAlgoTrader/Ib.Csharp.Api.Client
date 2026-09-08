@@ -6,7 +6,7 @@ using NUnit.Framework.Legacy;
 namespace Ib.Csharp.Api.Client.Tests;
 
 [TestFixture]
-public class PortfolioUpdatesTest
+public class GetPortfolioUpdatesTest
 {
     [Test]
     public async Task ShouldReceivePortfolioUpdates()

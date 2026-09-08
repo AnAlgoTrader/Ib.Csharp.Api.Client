@@ -14,12 +14,14 @@ public partial class IbClient
 
     public Action<Dictionary<int, PriceUpdate>> OnMarketDataPriceUpdate { get; set; }
     public Action<Dictionary<int, TradeUpdate>> OnMarketDataTradeUpdate { get; set; }
-    
+
     public Action<PriceTickByTickUpdate> OnMarketDataPriceTickByTickUpdate { get; set; }
     public Action<TradeTickByTickUpdate> OnMarketDataTradeTickByTickUpdate { get; set; }
 
     private OrderBookRow[] orderBook;
     public Action<OrderBookRow[]> OnOrderBookUpdate { get; set; }
+
+    public Action<RealTimeBar> OnRealTimeBarUpdate { get; set; }
 
     public void SubscribeToMarketData(int requestId, ContractDetails contractDetails)
     {
@@ -102,6 +104,7 @@ public partial class IbClient
             historicalDataTask?.TrySetException(ex);
             return;
         }
+
         if (id == _pendingHistoricalTickReqId)
         {
             historicalTickBidAskTask?.TrySetException(ex);
@@ -185,7 +188,7 @@ public partial class IbClient
     public Action<List<HistoricalTickBidAsk>> OnHistoricalTickBidAskUpdate { get; set; }
     private TaskCompletionSource<List<HistoricalTickBidAsk>> historicalTickBidAskTask;
     private List<HistoricalTickBidAsk> historicalTickBidAskList;
-    
+
     /// <param name="reqId"></param>
     /// <param name="contract"></param>
     /// <param name="endTime"></param>
@@ -224,7 +227,7 @@ public partial class IbClient
     public Action<List<HistoricalTickLast>> OnHistoricalTickLastUpdate { get; set; }
     private TaskCompletionSource<List<HistoricalTickLast>> historicalTickLastTask;
     private List<HistoricalTickLast> historicalTickLastList;
-   
+
     /// <param name="reqId"></param>
     /// <param name="contract"></param>
     /// <param name="endTime"></param>
@@ -262,7 +265,6 @@ public partial class IbClient
     /// hours, not the day — walking forward past a session close continues into the next
     /// session's regular hours, so a caller wanting one session must still bound the end itself.
     /// </param>
-    
     public async Task<List<HistoricalTickLast>> GetHistoricalTickLastFrom(int reqId, Contract contract,
         string startTime, int timeoutMs, bool useRth = true)
     {
@@ -341,7 +343,7 @@ public partial class IbClient
     {
         _clientSocket.reqTickByTickData(reqId, contract, "BidAsk", 0, true);
     }
-    
+
     public void tickByTickBidAsk(int reqId, long time, double bidPrice, double askPrice, decimal bidSize, decimal askSize,
         TickAttribBidAsk tickAttribBidAsk)
     {
@@ -357,12 +359,12 @@ public partial class IbClient
         };
         OnMarketDataPriceTickByTickUpdate?.Invoke(tickByTickUpdate);
     }
-    
+
     public void SubscribeToTradesTickByTick(int reqId, Contract contract)
     {
         _clientSocket.reqTickByTickData(reqId, contract, "Last", 0, true);
     }
-    
+
     public void tickByTickAllLast(int reqId, int tickType, long time, double price, decimal size, TickAttribLast tickAttribLast,
         string exchange, string specialConditions)
     {
@@ -378,5 +380,25 @@ public partial class IbClient
             SpecialConditions = specialConditions
         };
         OnMarketDataTradeTickByTickUpdate?.Invoke(tickByTickUpdate);
+    }
+
+    public void SubscribeToRealTimeBars(int reqId, Contract contract)
+    {
+        _clientSocket.reqRealTimeBars(reqId, contract, 5, "TRADES", true, null);
+    }
+
+    public void realtimeBar(int reqId, long date, double open, double high, double low, double close, decimal volume, decimal wap, int count)
+    {
+        var realTimeBar = new RealTimeBar
+        {
+            Date = date,
+            Open = open,
+            High = high,
+            Low = low,
+            Close = close,
+            Volume = volume,
+            Wap = wap
+        };
+        OnRealTimeBarUpdate?.Invoke(realTimeBar);
     }
 }
