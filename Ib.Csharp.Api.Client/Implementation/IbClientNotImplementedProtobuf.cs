@@ -136,7 +136,7 @@ public partial class IbClient
 
     public void realTimeBarTickProtoBuf(RealTimeBarTick realTimeBarTickProto)
     {
-        NotImplemented();
+        //ignored
     }
 
     public void headTimestampProtoBuf(HeadTimestamp headTimestampProto)

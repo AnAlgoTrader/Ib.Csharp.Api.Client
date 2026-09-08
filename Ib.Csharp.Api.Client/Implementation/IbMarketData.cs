@@ -384,7 +384,7 @@ public partial class IbClient
 
     public void SubscribeToRealTimeBars(int reqId, Contract contract)
     {
-        _clientSocket.reqRealTimeBars(reqId, contract, 5, "TRADES", true, null);
+        _clientSocket.reqRealTimeBars(reqId, contract, 5, "TRADES", false, null);
     }
 
     public void realtimeBar(int reqId, long date, double open, double high, double low, double close, decimal volume, decimal wap, int count)

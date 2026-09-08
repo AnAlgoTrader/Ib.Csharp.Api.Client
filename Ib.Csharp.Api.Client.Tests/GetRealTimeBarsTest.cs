@@ -17,9 +17,8 @@ public class GetRealTimeBarsTest
             Console.WriteLine($"Real time bar received: Open:{realTimeBar.Open}");
         };
         const int requestId = 1005;
-        var contractDataList = await client.GetContractData("ES", "FUT");
-        var contractDetails = contractDataList.OrderBy(x=> x.Contract.LastTradeDate).FirstOrDefault(x=> 
-            DateTime.ParseExact(x.Contract.LastTradeDate, "yyyyMMdd", System.Globalization.CultureInfo.InvariantCulture) > DateTime.Now);
+        var contractDataList = await client.GetContractData("QQQ", "STK");
+        var contractDetails = contractDataList.OrderBy(x => x.Contract.LastTradeDate).FirstOrDefault(x => x.Contract.Exchange == "SMART" && x.Contract.Currency == "USD")!;
         client.NotifySubscriber($"Using contract - Exchange:{contractDetails?.Contract.Exchange} LastDate:{contractDetails?.Contract.LastTradeDate}");
         client.SubscribeToRealTimeBars(requestId, contractDetails!.Contract);
 
