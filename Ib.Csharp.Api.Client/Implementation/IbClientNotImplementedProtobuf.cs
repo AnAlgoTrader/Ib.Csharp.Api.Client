@@ -66,7 +66,7 @@ public partial class IbClient
 
     public void updateMarketDepthProtoBuf(MarketDepth marketDepthProto)
     {
-        NotImplemented();
+        //ignored
     }
 
     public void updateMarketDepthL2ProtoBuf(MarketDepthL2 marketDepthL2Proto)

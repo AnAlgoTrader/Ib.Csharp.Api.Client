@@ -30,7 +30,7 @@ namespace Ib.Csharp.Api.Client.Tests
             };
             client.Start("127.0.0.1", 4001, 0);
             
-            var contractDataList = await client.GetContractData("NQ", "FUT");
+            var contractDataList = await client.GetContractData("ES", "FUT");
             var contractDetails = contractDataList.OrderBy(x=> x.Contract.LastTradeDate).FirstOrDefault(x=>
                 DateTime.ParseExact(x.Contract.LastTradeDate, "yyyyMMdd", System.Globalization.CultureInfo.InvariantCulture) > DateTime.Now);
             
