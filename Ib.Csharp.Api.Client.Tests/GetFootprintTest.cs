@@ -1,23 +1,19 @@
 using Ib.Csharp.Api.Client.Implementation;
+using Ib.Csharp.Api.Client.Implementation.Helper;
 
 namespace Ib.Csharp.Api.Client.Tests;
 
 [TestFixture]
-public class GetFootprintTest
+public class GetFootPrintTest
 {
     [Test]
     public async Task ShouldBuildFootprint()
     {
+        var footPrintHelper = new FootPrintHelper();
         using var client = new IbClient();
         client.OnNotification += Console.WriteLine;
-        client.OnMarketDataPriceTickByTickUpdate += price =>
-        {
-            //TODO
-        };
-        client.OnMarketDataTradeTickByTickUpdate += trade =>
-        {
-            //TODO
-        };
+        client.OnMarketDataPriceTickByTickUpdate += footPrintHelper.UpdatePrice;
+        client.OnMarketDataTradeTickByTickUpdate += footPrintHelper.UpdateTrade;
         client.Start("127.0.0.1", 4001, 0);
 
         var contractDataList = await client.GetContractData("ES", "FUT");
