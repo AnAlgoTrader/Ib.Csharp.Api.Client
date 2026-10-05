@@ -91,7 +91,7 @@ public class FootPrintHelper
         {
             row.AskSize += (double)trade.Size;
         }
-        else
+        else if (trade.Side == TradeSide.Sell)
         {
             row.BidSize += (double)trade.Size;
         }
