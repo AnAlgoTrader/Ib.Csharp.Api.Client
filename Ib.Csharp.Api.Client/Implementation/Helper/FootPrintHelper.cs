@@ -99,13 +99,15 @@ public class FootPrintHelper
     public static string FormatColumn(FootPrintColumn column)
     {
         var sb = new System.Text.StringBuilder();
-        sb.AppendLine($"Footprint Column: {column.Time:yyyy-MM-dd HH:mm:ss} UTC");
+        sb.AppendLine($"Footprint Column: {column.Time:yyyy-MM-dd HH:mm:ss} UTC | Total Delta: {column.DeltaSize:F0} | Total Vol: {column.TotalSize:F0}");
         sb.AppendLine($"{"BID VOL",10} | {"PRICE",10} | {"ASK VOL",10} | {"DELTA",10}");
         sb.AppendLine(new string('-', 49));
         foreach (var row in column.Rows)
         {
             sb.AppendLine($"{row.BidSize,10:F0} | {row.Level,10:F2} | {row.AskSize,10:F0} | {row.DeltaSize,10:F0}");
         }
+        sb.AppendLine(new string('-', 49));
+        sb.AppendLine($"{"TOTAL DELTA:",35} {column.DeltaSize,10:F0}");
         return sb.ToString();
     }
 }
