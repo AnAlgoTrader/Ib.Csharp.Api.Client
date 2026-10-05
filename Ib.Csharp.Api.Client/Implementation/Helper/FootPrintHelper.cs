@@ -53,7 +53,8 @@ public class FootPrintHelper
                 {
                     Level = r.Level,
                     BidSize = r.BidSize,
-                    AskSize = r.AskSize
+                    AskSize = r.AskSize,
+                    IsPoc = r.IsPoc
                 }).ToList()
             }).ToList();
         }
@@ -94,6 +95,12 @@ public class FootPrintHelper
         {
             row.BidSize += (double)trade.Size;
         }
+
+        var maxVol = targetColumn.Rows.Max(r => r.BidSize + r.AskSize);
+        foreach (var r in targetColumn.Rows)
+        {
+            r.IsPoc = maxVol > 0 && Math.Abs((r.BidSize + r.AskSize) - maxVol) < 1e-4;
+        }
     }
 
     public static string FormatColumn(FootPrintColumn column)
@@ -104,7 +111,8 @@ public class FootPrintHelper
         sb.AppendLine(new string('-', 49));
         foreach (var row in column.Rows)
         {
-            sb.AppendLine($"{row.BidSize,10:F0} | {row.Level,10:F2} | {row.AskSize,10:F0} | {row.DeltaSize,10:F0}");
+            var pocTag = row.IsPoc ? " <-- POC" : "";
+            sb.AppendLine($"{row.BidSize,10:F0} | {row.Level,10:F2} | {row.AskSize,10:F0} | {row.DeltaSize,10:F0}{pocTag}");
         }
         sb.AppendLine(new string('-', 49));
         sb.AppendLine($"{"TOTAL DELTA:",35} {column.DeltaSize,10:F0}");

@@ -6,4 +6,5 @@ public class FootPrintRow
     public double BidSize { get; set; }
     public double AskSize { get; set; }
     public double DeltaSize => BidSize - AskSize;
+    public bool IsPoc { get; set; }
 }
