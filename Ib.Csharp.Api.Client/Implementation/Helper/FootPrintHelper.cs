@@ -49,6 +49,8 @@ public class FootPrintHelper
             return Columns.Select(c => new FootPrintColumn
             {
                 Time = c.Time,
+                FirstPrice = c.FirstPrice,
+                LastPrice = c.LastPrice,
                 Rows = c.Rows.Select(r => new FootPrintRow
                 {
                     Level = r.Level,
@@ -69,13 +71,22 @@ public class FootPrintHelper
 
         if (targetColumn == null)
         {
-            targetColumn = new FootPrintColumn { Time = columnTime };
+            targetColumn = new FootPrintColumn
+            {
+                Time = columnTime,
+                FirstPrice = trade.Price,
+                LastPrice = trade.Price
+            };
             Columns.Add(targetColumn);
 
             if (Columns.Count > 5)
             {
                 Columns.RemoveAt(0);
             }
+        }
+        else
+        {
+            targetColumn.LastPrice = trade.Price;
         }
 
         var roundedPrice = Math.Round(trade.Price, 4);
@@ -106,7 +117,13 @@ public class FootPrintHelper
     public static string FormatColumn(FootPrintColumn column)
     {
         var sb = new System.Text.StringBuilder();
-        sb.AppendLine($"Footprint Column: {column.Time:yyyy-MM-dd HH:mm:ss} UTC | Total Delta: {column.DeltaSize:F0} | Total Vol: {column.TotalSize:F0}");
+        var trendLabel = column.Trend switch
+        {
+            ColumnTrend.Up => "UP (GREEN)",
+            ColumnTrend.Down => "DOWN (RED)",
+            _ => "FLAT"
+        };
+        sb.AppendLine($"Footprint Column: {column.Time:yyyy-MM-dd HH:mm:ss} UTC | Trend: {trendLabel} [First: {column.FirstPrice:F2}, Last: {column.LastPrice:F2}] | Total Delta: {column.DeltaSize:F0} | Total Vol: {column.TotalSize:F0}");
         sb.AppendLine($"{"BID VOL",10} | {"PRICE",10} | {"ASK VOL",10} | {"DELTA",10}");
         sb.AppendLine(new string('-', 49));
         foreach (var row in column.Rows)
