@@ -78,6 +78,7 @@ public class BufferedLeeReadyClassifier
     private readonly Queue<(long Time, double Price, decimal Size, DateTime Deadline)> _pendingTrades = new();
 
     private double _lastTradedPrice = double.NaN;
+    private TradeSide _lastTradeSide = TradeSide.Unknown;
 
     public event Action<ClassifiedTrade> OnTradeClassified;
 
@@ -123,6 +124,28 @@ public class BufferedLeeReadyClassifier
         {
             var trade = _pendingTrades.Dequeue();
             var side = Classify(trade.Time, trade.Price);
+            if (side != TradeSide.Unknown)
+            {
+                _lastTradeSide = side;
+            }
+            _lastTradedPrice = trade.Price;
+            OnTradeClassified?.Invoke(new ClassifiedTrade(trade.Time, trade.Price, trade.Size, side));
+        }
+    }
+
+    /// <summary>
+    /// Flushes all pending trades immediately without waiting for the buffer window.
+    /// </summary>
+    public void Flush()
+    {
+        while (_pendingTrades.Count > 0)
+        {
+            var trade = _pendingTrades.Dequeue();
+            var side = Classify(trade.Time, trade.Price);
+            if (side != TradeSide.Unknown)
+            {
+                _lastTradeSide = side;
+            }
             _lastTradedPrice = trade.Price;
             OnTradeClassified?.Invoke(new ClassifiedTrade(trade.Time, trade.Price, trade.Size, side));
         }
@@ -132,7 +155,7 @@ public class BufferedLeeReadyClassifier
     {
         var quote = GetQuoteAsOf(tradeTime);
 
-        if (quote.HasValue)
+        if (quote.HasValue && quote.Value.Bid > 0 && quote.Value.Ask > 0)
         {
             double mid = quote.Value.Mid;
             if (price > mid) return TradeSide.Buy;
@@ -148,7 +171,7 @@ public class BufferedLeeReadyClassifier
         if (double.IsNaN(_lastTradedPrice)) return TradeSide.Unknown;
         if (price > _lastTradedPrice) return TradeSide.Buy;
         if (price < _lastTradedPrice) return TradeSide.Sell;
-        return TradeSide.Unknown; // no price change -> can't classify
+        return _lastTradeSide; // zero-tick rule: maintain previous tick direction
     }
 
     // Latest quote with Time <= tradeTime. Binary search since _quotes
