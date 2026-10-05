@@ -22,10 +22,10 @@ public class GetFootPrintTest
         client.NotifySubscriber($"Using contract - Exchange:{contract?.Contract.Exchange} LastDate:{contract?.Contract.LastTradeDate}");
 
         client.SubscribeToPriceTickByTick(1105, contract!.Contract);
-        client.SubscribeToTradesTickByTick(1106, contract!.Contract);
+        client.SubscribeToTradesTickByTick(1106, contract.Contract);
 
         using var cts = new CancellationTokenSource();
-        ConsoleCancelEventHandler cancelHandler = (s, e) =>
+        ConsoleCancelEventHandler cancelHandler = (_, e) =>
         {
             e.Cancel = true;
             cts.Cancel();
@@ -55,7 +55,7 @@ public class GetFootPrintTest
                     sb.AppendLine(FootPrintHelper.FormatColumn(columns[i]));
                 }
 
-                await File.WriteAllTextAsync(logFile, sb.ToString());
+                await File.WriteAllTextAsync(logFile, sb.ToString(), cts.Token);
             }
         }
         finally

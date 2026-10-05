@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using Ib.Csharp.Api.Client.Implementation.Model;
 
 namespace Ib.Csharp.Api.Client.Implementation.Helper;
@@ -8,9 +9,9 @@ namespace Ib.Csharp.Api.Client.Implementation.Helper;
 public class FootPrintHelper
 {
     private readonly BufferedLeeReadyClassifier _classifier;
-    private readonly object _lock = new();
+    private readonly Lock _lock = new();
 
-    public List<FootPrintColumn> Columns { get; } = new();
+    private List<FootPrintColumn> Columns { get; } = new();
 
     public FootPrintHelper()
     {
@@ -60,7 +61,7 @@ public class FootPrintHelper
 
     private void HandleClassifiedTrade(ClassifiedTrade trade)
     {
-        long minuteStartSec = (trade.Time / 60) * 60;
+        long minuteStartSec = trade.Time / 60 * 60;
         var columnTime = DateTimeOffset.FromUnixTimeSeconds(minuteStartSec).UtcDateTime;
 
         var targetColumn = Columns.FirstOrDefault(c => c.Time == columnTime);
