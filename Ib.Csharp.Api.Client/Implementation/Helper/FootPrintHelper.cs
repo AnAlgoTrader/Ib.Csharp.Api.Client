@@ -8,14 +8,14 @@ namespace Ib.Csharp.Api.Client.Implementation.Helper;
 
 public class FootPrintHelper
 {
-    private readonly BufferedLeeReadyClassifier _classifier;
+    private readonly LeeReadyClassifier _classifier;
     private readonly Lock _lock = new();
 
-    private List<FootPrintColumn> Columns { get; } = new();
+    public List<FootPrintColumn> Columns { get; } = new();
 
     public FootPrintHelper()
     {
-        _classifier = new BufferedLeeReadyClassifier();
+        _classifier = new LeeReadyClassifier();
         _classifier.OnTradeClassified += HandleClassifiedTrade;
     }
 
@@ -24,7 +24,6 @@ public class FootPrintHelper
         lock (_lock)
         {
             _classifier.OnQuote(price.Time, price.Bid, price.Ask);
-            _classifier.Pump();
         }
     }
 
@@ -33,7 +32,6 @@ public class FootPrintHelper
         lock (_lock)
         {
             _classifier.OnTrade(trade.Time, trade.Price, trade.Size);
-            _classifier.Pump();
         }
     }
 
@@ -44,8 +42,6 @@ public class FootPrintHelper
     {
         lock (_lock)
         {
-            _classifier.Pump();
-
             return Columns.Select(c => new FootPrintColumn
             {
                 Time = c.Time,
