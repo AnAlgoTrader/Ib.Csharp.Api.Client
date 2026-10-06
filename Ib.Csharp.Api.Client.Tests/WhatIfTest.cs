@@ -42,11 +42,12 @@ public class WhatIfTest
         
         var whatIfTask = AsyncHelper.WaitForCallback<OpenOrderUpdate>(
             subscribe => client.OnOpenOrderUpdate += subscribe,
-            10000);
+            60000);
 
         client.WhatIf(contract?.Contract, order);
         var openOrderUpdate = await whatIfTask;
 
+        client.NotifySubscriber($"WhatIf --> Symbol:{contract!.Contract.Symbol} Expiration:{contract.Contract.LastTradeDateOrContractMonth}");
         client.NotifySubscriber($"WhatIf --> InitMargin:{openOrderUpdate.OrderState.InitMarginChange} MaintMargin:{openOrderUpdate.OrderState.MaintMarginChange} Commission:{openOrderUpdate.OrderState.CommissionAndFees}");
     }
 }
