@@ -1,5 +1,3 @@
-using System;
-using System.Linq;
 using Ib.Csharp.Api.Client.Implementation;
 using Ib.Csharp.Api.Client.Implementation.Helper;
 using Ib.Csharp.Api.Client.Implementation.Model;
@@ -12,7 +10,7 @@ public class GetFootPrintTest
     [Test]
     public async Task ShouldBuildFootprint()
     {
-        var footPrintHelper = new FootPrintHelper();
+        var footPrintHelper = new FootPrintHelper(1000);
         using var client = new IbClient();
         client.OnNotification += Console.WriteLine;
         client.OnMarketDataPriceTickByTickUpdate += footPrintHelper.UpdatePrice;
@@ -103,7 +101,7 @@ public class GetFootPrintTest
     [Test]
     public void ShouldBuildFootprintFromTicks()
     {
-        var helper = new FootPrintHelper();
+        var helper = new FootPrintHelper(1000);
         long t = 1728130000; // Fixed timestamp
 
         // Set quote: 5000.00 Bid / 5000.25 Ask
