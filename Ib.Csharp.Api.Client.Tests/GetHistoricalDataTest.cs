@@ -1,7 +1,6 @@
 using System.Text;
 using Ib.Csharp.Api.Client.Implementation;
 using Ib.Csharp.Api.Client.Implementation.Model;
-using NUnit.Framework.Legacy;
 
 namespace Ib.Csharp.Api.Client.Tests;
 
@@ -21,15 +20,15 @@ public class GetHistoricalDataTest
                 System.Globalization.CultureInfo.InvariantCulture) > DateTime.Now);
         
         var historicalDataList = await client.GetHistoricalData(1020, contract!.Contract, $"1 {nameof(Duration.Y)}", $"1 {nameof(BarSize.min)}", "TRADES", 600000);
-        ClassicAssert.IsNotEmpty(historicalDataList);
+        Assert.That(historicalDataList, Is.Not.Empty);
 
         var output = new StringBuilder();
-        const string headers = "Date, Open, High, Low, Close, Volume";
+        const string headers = "Date, Open, High, Low, Close, Volume, Vwap";
         output.AppendLine(headers);
 
         foreach (var bar in historicalDataList)
         {
-            output.AppendLine($"{bar.Time},{bar.Open},{bar.High},{bar.Low},{bar.Close},{bar.Volume}");
+            output.AppendLine($"{bar.Time},{bar.Open},{bar.High},{bar.Low},{bar.Close},{bar.Volume}, {bar.WAP}");
         }
         
         await File.WriteAllTextAsync("historicalData.csv", output.ToString());
