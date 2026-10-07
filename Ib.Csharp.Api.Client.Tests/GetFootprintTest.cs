@@ -152,4 +152,33 @@ public class GetFootPrintTest
         var formatted = FootPrintHelper.FormatColumn(col);
         Assert.That(formatted, Does.Contain("TOTAL DELTA:"));
     }
+
+    [Test]
+    public void ShouldRollColumnEvery1000Ticks()
+    {
+        var helper = new FootPrintHelper(1000);
+        long t = 1728130000;
+
+        helper.UpdatePrice(new PriceTickByTickUpdate { Time = t, Bid = 5000.00, Ask = 5000.25 });
+
+        for (var i = 0; i < 2500; i++)
+        {
+            helper.UpdateTrade(new TradeTickByTickUpdate
+            {
+                Time = t + i / 100,
+                Price = i % 2 == 0 ? 5000.25 : 5000.00,
+                Size = 1
+            });
+        }
+
+        var columns = helper.GetSnapshot();
+        Assert.That(columns, Has.Count.EqualTo(3));
+        Assert.That(columns[0].TotalSize, Is.EqualTo(1000));
+        Assert.That(columns[1].TotalSize, Is.EqualTo(1000));
+        Assert.That(columns[2].TotalSize, Is.EqualTo(500));
+
+        // Columns are ordered oldest -> newest with strictly increasing start times.
+        Assert.That(columns[1].Time, Is.GreaterThan(columns[0].Time));
+        Assert.That(columns[2].Time, Is.GreaterThan(columns[1].Time));
+    }
 }

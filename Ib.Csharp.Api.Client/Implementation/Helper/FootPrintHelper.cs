@@ -10,11 +10,14 @@ public class FootPrintHelper
 {
     private readonly LeeReadyClassifier _classifier;
     private readonly Lock _lock = new();
+    private readonly int _ticksPerColumn;
+    private int _tradesInCurrentColumn;
 
     public List<FootPrintColumn> Columns { get; } = new();
 
-    public FootPrintHelper()
+    public FootPrintHelper(int ticksPerColumn)
     {
+        _ticksPerColumn = Math.Max(1, ticksPerColumn);
         _classifier = new LeeReadyClassifier();
         _classifier.OnTradeClassified += HandleClassifiedTrade;
     }
@@ -60,30 +63,27 @@ public class FootPrintHelper
 
     private void HandleClassifiedTrade(ClassifiedTrade trade)
     {
-        long minuteStartSec = trade.Time / 60 * 60;
-        var columnTime = DateTimeOffset.FromUnixTimeSeconds(minuteStartSec).UtcDateTime;
-
-        var targetColumn = Columns.FirstOrDefault(c => c.Time == columnTime);
-
-        if (targetColumn == null)
+        if (Columns.Count == 0 || _tradesInCurrentColumn >= _ticksPerColumn)
         {
-            targetColumn = new FootPrintColumn
+            var columnTime = DateTimeOffset.FromUnixTimeSeconds(trade.Time).UtcDateTime;
+            Columns.Add(new FootPrintColumn
             {
                 Time = columnTime,
                 FirstPrice = trade.Price,
                 LastPrice = trade.Price
-            };
-            Columns.Add(targetColumn);
+            });
+            _tradesInCurrentColumn = 0;
 
             if (Columns.Count > 5)
             {
                 Columns.RemoveAt(0);
             }
         }
-        else
-        {
-            targetColumn.LastPrice = trade.Price;
-        }
+
+        _tradesInCurrentColumn++;
+
+        var targetColumn = Columns[^1];
+        targetColumn.LastPrice = trade.Price;
 
         var roundedPrice = Math.Round(trade.Price, 4);
         var row = targetColumn.Rows.FirstOrDefault(r => Math.Abs(r.Level - roundedPrice) < 1e-4);
