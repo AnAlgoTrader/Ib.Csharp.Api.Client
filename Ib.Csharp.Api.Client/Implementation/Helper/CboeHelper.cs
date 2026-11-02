@@ -13,7 +13,6 @@ namespace Ib.Csharp.Api.Client.Implementation.Helper;
 public class CboeHelper
 {
     private const string SpxUrl = "https://cdn.cboe.com/api/global/delayed_quotes/options/_SPX.json";
-    private const string DateFormat = "yyyyMMdd";
     private const double StrikeRange = 100;
 
     private static async Task<string> DownloadAllDataAsync()
@@ -144,7 +143,7 @@ public class CboeHelper
 
     private static ContractDetails CreateContract(ParsedOption parsed)
     {
-        var expiration = parsed.ExpirationDate.ToString(DateFormat, CultureInfo.InvariantCulture);
+        var expiration = parsed.ExpirationDate.ToString(DateHelper.IbkrDateFormat, CultureInfo.InvariantCulture);
         var right = parsed.IsCall ? "C" : "P";
 
         return new ContractDetails

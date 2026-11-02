@@ -19,7 +19,7 @@ public class GetHistoricalDataOptionsTest
         string expiration = DateTime.Now.AddDays(1).ToString("yyyyMMdd");
         var optionsContractList = await OptionChainHelper.GetOptionsChainContracts(client, symbol, exchange, expiration);
 
-        var currentMarketPrice = await MarketDataHelper.GetSpxPrice();
+        var currentMarketPrice = await YahooDataHelper.GetSpxPrice();
         var strikes = optionsContractList.Select(x => x.Contract.Strike).ToList();
         var strike = CollectionHelper.GetClosest(strikes, MathHelper.RoundToNearest(currentMarketPrice));
         var contract = optionsContractList.FirstOrDefault(x => MathHelper.DoubleEquals(x.Contract.Strike, strike));

@@ -4,7 +4,7 @@ using Newtonsoft.Json.Linq;
 
 namespace Ib.Csharp.Api.Client.Implementation.Helper;
 
-public static class MarketDataHelper
+public static class YahooDataHelper
 {
     private static readonly HttpClient HttpClient = new();
 
@@ -22,14 +22,13 @@ public static class MarketDataHelper
             var meta = result?["meta"];
             
             double price = meta?["regularMarketPrice"]?.Value<double>() ?? -1.0;
-            
-            var closes = result?["indicators"]?["quote"]?[0]?["close"] as JArray;
-            if (closes != null && closes.Count > 0)
+
+            if (result?["indicators"]?["quote"]?[0]?["close"] is JArray { Count: > 0 } closes)
             {
                 for (int i = closes.Count - 1; i >= 0; i--)
                 {
                     var val = closes[i]?.Value<double?>();
-                    if (val.HasValue && val.Value > 0)
+                    if (val is > 0)
                     {
                         price = val.Value;
                         break;

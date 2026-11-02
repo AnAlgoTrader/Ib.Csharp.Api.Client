@@ -37,7 +37,7 @@ public class GetOptionsDataTest
         var optionDefinition = optionDefinitions.First(x => x.Expirations.Contains(date) && x.Exchange == "CBOE");
         ClassicAssert.IsNotNull(optionDefinition);
         
-        var price = await MarketDataHelper.GetSpxPrice();
+        var price = await YahooDataHelper.GetSpxPrice();
         var strike = CollectionHelper.GetClosest(optionDefinition.Strikes.ToHashSet(), MathHelper.RoundToNearest(price));
         var callSideContract =
              await OptionChainHelper.GetOptionChainContract(client, optionDefinition, "OPT", strike, "C", date);

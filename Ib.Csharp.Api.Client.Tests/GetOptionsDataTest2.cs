@@ -33,7 +33,7 @@ public class GetOptionsDataTest2
         var optionsContractList = await OptionChainHelper.GetOptionsChainContracts(client, symbol, exchange, expiration);
         await CommonTest.SaveAllContractsToAFile(optionsContractList, "optionsContracts2.csv");
         
-        var currentMarketPrice = await MarketDataHelper.GetSpxPrice();
+        var currentMarketPrice = await YahooDataHelper.GetSpxPrice();
         var strikes = optionsContractList.Select(x => x.Contract.Strike).ToList();
         var strike = CollectionHelper.GetClosest(strikes, MathHelper.RoundToNearest(currentMarketPrice));
         var contract = optionsContractList.FirstOrDefault(x => MathHelper.DoubleEquals(x.Contract.Strike, strike));

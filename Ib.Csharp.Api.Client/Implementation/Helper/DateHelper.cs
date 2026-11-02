@@ -7,7 +7,7 @@ namespace Ib.Csharp.Api.Client.Implementation.Helper;
 
 public static class DateHelper
 {
-    private const string IbkrDateFormat = "yyyyMMdd";
+    public const string IbkrDateFormat = "yyyyMMdd";
 
     public static DateTime GetNextWednesday(DateTime fromDate)
     {

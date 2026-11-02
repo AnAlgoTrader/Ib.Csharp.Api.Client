@@ -29,7 +29,7 @@ public class GetOptionsOnFuturesDataTest
         Console.WriteLine($"Expiration: {selectedExpiration}");
         await CommonTest.SaveAllContractsToAFile(optionOnFuturesContractList, "optionsContracts.csv");
 
-        var currentMarketPrice = await MarketDataHelper.GetESPrice();
+        var currentMarketPrice = await YahooDataHelper.GetESPrice();
         var strikes = optionOnFuturesContractList.Select(x => x.Contract.Strike).ToList();
         var strike = CollectionHelper.GetClosest(strikes, MathHelper.RoundToNearest(currentMarketPrice));
         var contract = optionOnFuturesContractList.FirstOrDefault(x => MathHelper.DoubleEquals(x.Contract.Strike, strike));
