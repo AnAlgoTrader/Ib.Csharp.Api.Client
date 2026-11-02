@@ -33,10 +33,8 @@ public class CboeHelper
 
     private static async Task<CboeData> GetCboeRawDataset()
     {
-        //I am reading from a static json file, just for the development process, so I don't have to call the service every single time
-        //var json = await DownloadAllDataAsync();
-        //await File.WriteAllTextAsync("./cboeData.json", json);
-        var json = await File.ReadAllTextAsync("./cboeData.json");
+        var json = await DownloadAllDataAsync();
+        await File.WriteAllTextAsync("./cboeData.json", json);
         return CboeData.FromJson(json);
     }
 
