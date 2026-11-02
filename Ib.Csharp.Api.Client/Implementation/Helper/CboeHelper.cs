@@ -75,6 +75,15 @@ public class CboeHelper
             .ToList();
     }
 
+    public static async Task<CboeChain> GetTodaySpxwChain()
+    {
+        var chains = await GetCboeChains();
+        var today = DateTime.Today;
+
+        return chains.FirstOrDefault(chain =>
+            chain.Symbol == "SPXW" && chain.ExpirationDate.Date == today);
+    }
+
     private static OptionChainData BuildChainData(
         double strike,
         IEnumerable<(Option Option, ParsedOption Parsed)> options,
