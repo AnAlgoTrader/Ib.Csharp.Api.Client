@@ -14,7 +14,7 @@ public class CboeHelper
 {
     private const string SpxUrl = "https://cdn.cboe.com/api/global/delayed_quotes/options/_SPX.json";
     private const string IbkrDateFormat = "yyyyMMdd";
-    private const double StrikeRange = 200;
+    private const double StrikeRange = 100;
 
     private static async Task<string> DownloadAllDataAsync()
     {
