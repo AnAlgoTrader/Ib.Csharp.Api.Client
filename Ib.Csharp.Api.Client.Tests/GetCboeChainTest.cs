@@ -10,5 +10,6 @@ public class GetCboeChainTest
     {
         var data = await CboeHelper.GetCboeChains();
         var symbols = data.Select(x => x.Symbol).Distinct().ToList();
+        Assert.That(symbols, Has.Count.EqualTo(2));
     }
 }
