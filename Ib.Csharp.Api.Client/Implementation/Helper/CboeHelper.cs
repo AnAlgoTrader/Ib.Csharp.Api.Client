@@ -14,6 +14,7 @@ public class CboeHelper
 {
     private const string SpxUrl = "https://cdn.cboe.com/api/global/delayed_quotes/options/_SPX.json";
     private const string IbkrDateFormat = "yyyyMMdd";
+    private const double StrikeRange = 200;
 
     private static async Task<string> DownloadAllDataAsync()
     {
@@ -56,6 +57,7 @@ public class CboeHelper
         }
 
         return parsedOptions
+            .Where(x => Math.Abs(x.Parsed.Strike - underlyingPrice) <= StrikeRange)
             .GroupBy(x => new { x.Parsed.Root, x.Parsed.ExpirationDate })
             .OrderBy(x => x.Key.ExpirationDate)
             .ThenBy(x => x.Key.Root)
@@ -65,9 +67,9 @@ public class CboeHelper
                 ExpirationDate = chainGroup.Key.ExpirationDate,
                 Data = chainGroup
                     .GroupBy(x => x.Parsed.Strike)
-                    .OrderBy(x => x.Key)
                     .Select(strikeGroup =>
                         BuildChainData(strikeGroup.Key, strikeGroup, underlyingPrice))
+                    .OrderBy(row => row.Strike)
                     .ToList()
             })
             .ToList();
