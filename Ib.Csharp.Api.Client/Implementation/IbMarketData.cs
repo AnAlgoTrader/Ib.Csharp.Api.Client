@@ -12,6 +12,12 @@ public partial class IbClient
     private readonly Dictionary<int, PriceUpdate> prices = new();
     private readonly Dictionary<int, TradeUpdate> trades = new();
 
+    // Subscriptions can be added/removed from UI threads while the IB message
+    // thread is dispatching ticks. Guard the dictionaries and always hand
+    // handlers an independent snapshot so they cannot enumerate a live
+    // collection that another thread is mutating.
+    private readonly object marketDataLock = new();
+
     public Action<Dictionary<int, PriceUpdate>> OnMarketDataPriceUpdate { get; set; }
     public Action<Dictionary<int, TradeUpdate>> OnMarketDataTradeUpdate { get; set; }
 
@@ -25,10 +31,13 @@ public partial class IbClient
 
     public void SubscribeToMarketData(int requestId, ContractDetails contractDetails)
     {
-        if (!prices.ContainsKey(requestId))
+        lock (marketDataLock)
         {
-            prices.Add(requestId, new PriceUpdate());
-            trades.Add(requestId, new TradeUpdate());
+            if (!prices.ContainsKey(requestId))
+            {
+                prices.Add(requestId, new PriceUpdate { RequestId = requestId });
+                trades.Add(requestId, new TradeUpdate());
+            }
         }
 
         _clientSocket.reqMktData(requestId, contractDetails.Contract, "101", false, false, null);
@@ -46,26 +55,84 @@ public partial class IbClient
     public void UnsubscribeFromMarketData(int requestId)
     {
         _clientSocket.cancelMktData(requestId);
+
+        // Drop the accumulated values so a later re-use of this request id
+        // cannot read stale quotes. Late in-flight ticks are ignored because
+        // tickPrice/tickSize only update known request ids.
+        lock (marketDataLock)
+        {
+            prices.Remove(requestId);
+            trades.Remove(requestId);
+        }
     }
 
     public void tickPrice(int tickerId, int field, double price, TickAttrib attribs)
     {
-        prices[tickerId].RequestId = tickerId;
-        prices[tickerId].setPrice(field, price);
-        trades[tickerId].setPrice(field, price);
+        lock (marketDataLock)
+        {
+            if (!prices.TryGetValue(tickerId, out var priceUpdate)) return;
+            if (!trades.TryGetValue(tickerId, out var tradeUpdate)) return;
+
+            priceUpdate.RequestId = tickerId;
+            priceUpdate.setPrice(field, price);
+            tradeUpdate.setPrice(field, price);
+        }
     }
 
     public void tickSize(int tickerId, int field, decimal size)
     {
-        prices[tickerId].setSize(field, size);
-        trades[tickerId].setSize(field, size);
+        Dictionary<int, PriceUpdate> priceSnapshot;
+        Dictionary<int, TradeUpdate> tradeSnapshot = null;
 
-        OnMarketDataPriceUpdate?.Invoke(prices);
-
-        if (field == TickType.LAST_SIZE)
+        lock (marketDataLock)
         {
-            OnMarketDataTradeUpdate?.Invoke(trades);
+            if (!prices.TryGetValue(tickerId, out var priceUpdate)) return;
+            if (!trades.TryGetValue(tickerId, out var tradeUpdate)) return;
+
+            priceUpdate.setSize(field, size);
+            tradeUpdate.setSize(field, size);
+
+            priceSnapshot = prices.ToDictionary(
+                pair => pair.Key,
+                pair => CopyPriceUpdate(pair.Value));
+
+            if (field == TickType.LAST_SIZE)
+            {
+                tradeSnapshot = trades.ToDictionary(
+                    pair => pair.Key,
+                    pair => CopyTradeUpdate(pair.Value));
+            }
         }
+
+        OnMarketDataPriceUpdate?.Invoke(priceSnapshot);
+
+        if (tradeSnapshot != null)
+        {
+            OnMarketDataTradeUpdate?.Invoke(tradeSnapshot);
+        }
+    }
+
+    private static PriceUpdate CopyPriceUpdate(PriceUpdate update)
+    {
+        return new PriceUpdate
+        {
+            RequestId = update.RequestId,
+            BidPrice = update.BidPrice,
+            AskPrice = update.AskPrice,
+            BidSize = update.BidSize,
+            AskSize = update.AskSize,
+            CallOpenInterest = update.CallOpenInterest,
+            PutOpenInterest = update.PutOpenInterest
+        };
+    }
+
+    private static TradeUpdate CopyTradeUpdate(TradeUpdate update)
+    {
+        return new TradeUpdate
+        {
+            LastTradedPrice = update.LastTradedPrice,
+            LastTradedSize = update.LastTradedSize
+        };
     }
 
     public Action<OptionComputation> OnOptionComputationUpdate { get; set; }
