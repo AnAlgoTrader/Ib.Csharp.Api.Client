@@ -7,12 +7,12 @@ namespace Ib.Csharp.Api.Client.Implementation;
 public partial class IbClient
 {
     private int _nextOrderId { get; set; }
-    
+
     public void nextValidId(int orderId)
     {
         _nextOrderId = orderId;
     }
-    
+
     public int GetNextValidId()
     {
         var orderId = _nextOrderId;
@@ -24,7 +24,7 @@ public partial class IbClient
     {
         _clientSocket.placeOrder(order.OrderId, contract, order);
     }
-    
+
     public void WhatIf(Contract contract, Order order)
     {
         order.WhatIf = true;
@@ -37,7 +37,7 @@ public partial class IbClient
         _clientSocket.cancelOrder(orderId, new OrderCancel());
     }
 
-    public void PlaceCreditSpreadOrder(Contract underlying, int shortConId, int longConId, decimal quantity, double limitPrice)
+    public void PlaceCreditSpreadOrder(Contract underlying, int shortConId, int longConId, decimal quantity, double shortBid, double longAsk)
     {
         var contract = new Contract
         {
@@ -72,16 +72,16 @@ public partial class IbClient
             Tif = "DAY",
             OrderType = "LMT",
             TotalQuantity = quantity,
-            LmtPrice = limitPrice,
+            LmtPrice = shortBid - longAsk,
             OutsideRth = true,
             Transmit = true
         };
 
         PlaceOrder(contract, order);
     }
-    
+
     public Action<ExecutionDetails> OnExecutionUpdate { get; set; }
-    
+
     public void execDetails(int reqId, Contract contract, Execution execution)
     {
         var executionDetails = new ExecutionDetails
@@ -92,13 +92,14 @@ public partial class IbClient
         };
         OnExecutionUpdate?.Invoke(executionDetails);
     }
-    
+
     public Action<CommissionAndFeesReport> OnCommissionAndFeesUpdate { get; set; }
+
     public void commissionAndFeesReport(CommissionAndFeesReport commissionAndFeesReport)
     {
         OnCommissionAndFeesUpdate?.Invoke(commissionAndFeesReport);
     }
-    
+
     public Action<OpenOrderUpdate> OnOpenOrderUpdate { get; set; }
 
     public void openOrder(int orderId, Contract contract, Order order, OrderState orderState)
@@ -114,7 +115,7 @@ public partial class IbClient
     }
 
     public Action<OrderStatus> OnOrderStatusUpdate { get; set; }
-    
+
     public void orderStatus(int orderId, string status, decimal filled, decimal remaining, double avgFillPrice, long permId,
         int parentId, double lastFillPrice, int clientId, string whyHeld, double mktCapPrice)
     {
