@@ -65,6 +65,7 @@ public partial class IbClient
 
         contract.ComboLegs = [shortLeg, longLeg];
 
+        double credit = shortBid - longAsk;
         var order = new Order
         {
             OrderId = GetNextValidId(),
@@ -72,7 +73,7 @@ public partial class IbClient
             Tif = "DAY",
             OrderType = "LMT",
             TotalQuantity = quantity,
-            LmtPrice = shortBid - longAsk,
+            LmtPrice = -Math.Round(credit, 2),
             OutsideRth = true,
             Transmit = true
         };
