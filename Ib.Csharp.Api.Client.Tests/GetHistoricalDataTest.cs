@@ -19,7 +19,7 @@ public class GetHistoricalDataTest
             DateTime.ParseExact(x.Contract.LastTradeDate, "yyyyMMdd",
                 System.Globalization.CultureInfo.InvariantCulture) > DateTime.Now);
 
-        var historicalDataList = await client.GetHistoricalData(1020, contract!.Contract, $"1 {nameof(Duration.Y)}", $"1 {nameof(BarSize.min)}", "TRADES", 600000);
+        var historicalDataList = await client.GetHistoricalData(1020, contract!.Contract, $"1 {nameof(Duration.M)}", $"1 {nameof(BarSize.min)}", "TRADES", 600000);
         Assert.That(historicalDataList, Is.Not.Empty);
 
         var output = new StringBuilder();

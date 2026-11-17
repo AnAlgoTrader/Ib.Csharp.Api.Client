@@ -1,6 +1,6 @@
 using System.Net.Http;
+using System.Text.Json;
 using System.Threading.Tasks;
-using Newtonsoft.Json.Linq;
 
 namespace Ib.Csharp.Api.Client.Implementation.Helper;
 
@@ -17,20 +17,43 @@ public static class YahooDataHelper
             
             var response = await HttpClient.GetStringAsync($"https://query1.finance.yahoo.com/v8/finance/chart/{symbol}?range=1d&interval=1m");
             
-            var json = JObject.Parse(response);
-            var result = json["chart"]?["result"]?[0];
-            var meta = result?["meta"];
-            
-            double price = meta?["regularMarketPrice"]?.Value<double>() ?? -1.0;
+            using var json = JsonDocument.Parse(response);
+            var root = json.RootElement;
 
-            if (result?["indicators"]?["quote"]?[0]?["close"] is JArray { Count: > 0 } closes)
+            if (!root.TryGetProperty("chart", out var chart)
+                || !chart.TryGetProperty("result", out var results)
+                || results.ValueKind != JsonValueKind.Array
+                || results.GetArrayLength() == 0)
             {
-                for (int i = closes.Count - 1; i >= 0; i--)
+                return -1.0;
+            }
+
+            var result = results[0];
+
+            double price = -1.0;
+            if (result.TryGetProperty("meta", out var meta)
+                && meta.TryGetProperty("regularMarketPrice", out var metaPrice)
+                && metaPrice.ValueKind == JsonValueKind.Number
+                && metaPrice.TryGetDouble(out var metaPriceValue))
+            {
+                price = metaPriceValue;
+            }
+
+            if (result.TryGetProperty("indicators", out var indicators)
+                && indicators.TryGetProperty("quote", out var quotes)
+                && quotes.ValueKind == JsonValueKind.Array
+                && quotes.GetArrayLength() > 0
+                && quotes[0].TryGetProperty("close", out var closes)
+                && closes.ValueKind == JsonValueKind.Array)
+            {
+                for (int i = closes.GetArrayLength() - 1; i >= 0; i--)
                 {
-                    var val = closes[i]?.Value<double?>();
-                    if (val is > 0)
+                    var close = closes[i];
+                    if (close.ValueKind == JsonValueKind.Number
+                        && close.TryGetDouble(out var val)
+                        && val > 0)
                     {
-                        price = val.Value;
+                        price = val;
                         break;
                     }
                 }

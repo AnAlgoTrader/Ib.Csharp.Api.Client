@@ -1,23 +1,17 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFramework>net9.0</TargetFramework>
+        <TargetFramework>net10.0</TargetFramework>
     </PropertyGroup>
 
     <ItemGroup>
-      <!-- Tests live in their own project (Tests/Ib.Csharp.Api.Client.Tests.csproj). This
-           csproj sits at the repo root, so its default glob would otherwise compile them
-           into the library as well. -->
       <Compile Remove="Tests\**" />
       <None Remove="Tests\**" />
       <EmbeddedResource Remove="Tests\**" />
     </ItemGroup>
 
     <ItemGroup>
-      <PackageReference Include="Google.Protobuf" Version="3.33.2" />
-      <!-- MarketDataHelper uses Newtonsoft.Json.Linq. It used to arrive transitively through
-           Microsoft.NET.Test.Sdk; with the tests split out it has to be declared here. -->
-      <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
+      <PackageReference Include="Google.Protobuf" Version="3.36.2" />
     </ItemGroup>
 
 </Project>
