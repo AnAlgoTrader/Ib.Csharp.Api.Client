@@ -19,6 +19,7 @@ public class CboeHelper
     {
         using var httpClient = new HttpClient();
         httpClient.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0");
+        httpClient.DefaultRequestHeaders.Add("Referer", "https://www.cboe.com/");
 
         using var request = new HttpRequestMessage(HttpMethod.Get, SpxUrl);
         request.Headers.Add("Cache-Control", "no-cache, no-store");
